@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // AI Clients data
 const AI_LIST = [
@@ -17,8 +17,18 @@ const AI_LIST = [
   { name: 'Amp', sym: '⚡', col: '#FFCC00', icon: null },
 ];
 
-// App catalogue
-const APPS = [
+// App type for real API data
+interface AppData {
+  nm: string;
+  bg: string;
+  fg: string;
+  l: string;
+  iconUrl?: string;
+  domain?: string;
+}
+
+// Fallback apps if API fails
+const FALLBACK_APPS: AppData[] = [
   { nm: 'Slack', bg: '#4A154B', fg: '#fff', l: 'S' },
   { nm: 'Notion', bg: '#000000', fg: '#fff', l: 'N' },
   { nm: 'Gmail', bg: '#EA4335', fg: '#fff', l: 'G' },
@@ -34,24 +44,6 @@ const APPS = [
   { nm: 'Asana', bg: '#F06A6A', fg: '#fff', l: 'A' },
   { nm: 'HubSpot', bg: '#FF7A59', fg: '#fff', l: 'H' },
 ];
-
-// App actions
-const APP_ACTIONS: Record<string, string> = {
-  Slack: 'Sent message',
-  Notion: 'Updated wiki',
-  Gmail: 'Sent email',
-  GitHub: 'Created issue',
-  Zapier: 'Ran workflow',
-  Linear: 'Filed ticket',
-  ClickUp: 'Created task',
-  Sheets: 'Updated data',
-  Trello: 'Moved card',
-  Airtable: 'Added record',
-  Figma: 'Left comment',
-  Jira: 'Logged issue',
-  Asana: 'Assigned task',
-  HubSpot: 'Logged contact',
-};
 
 // Cloud pattern
 const CLOUD_G = [
@@ -70,7 +62,7 @@ interface Cloud {
 }
 
 interface FallingApp {
-  app: (typeof APPS)[0];
+  app: AppData;
   x: number;
   y: number;
   vy: number;
@@ -79,7 +71,7 @@ interface FallingApp {
 }
 
 interface Mushroom {
-  app: (typeof APPS)[0];
+  app: AppData;
   state: 'landing' | 'gone';
   x: number;
   y: number;
@@ -115,8 +107,60 @@ interface ActionBubble {
   maxAge: number;
 }
 
+// Helper to determine if a color is light or dark
+function isLightColor(hex: string): boolean {
+  try {
+    const color = hex.replace('#', '');
+    const r = parseInt(color.substr(0, 2), 16);
+    const g = parseInt(color.substr(2, 2), 16);
+    const b = parseInt(color.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5;
+  } catch {
+    return false;
+  }
+}
+
 export default function HeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [apps, setApps] = useState<AppData[]>(FALLBACK_APPS);
+
+  // Fetch real app data from API
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const response = await fetch('https://plug-service.viasocket.com/api/v1/plugins/all');
+        const data = await response.json();
+        
+        if (data.data && Array.isArray(data.data)) {
+          const realApps: AppData[] = data.data
+            .filter((app: { name: string; domain: string; iconurl: string }) => app.name && app.domain && app.iconurl)
+            .map((app: { name: string; brandcolor?: string; iconurl: string; domain: string }) => {
+              const bgColor = app.brandcolor || '#4A154B';
+              const fgColor = isLightColor(bgColor) ? '#000' : '#fff';
+              return {
+                nm: app.name,
+                bg: bgColor,
+                fg: fgColor,
+                l: app.name.charAt(0).toUpperCase(),
+                iconUrl: app.iconurl,
+                domain: app.domain.toLowerCase(),
+              };
+            });
+          
+          if (realApps.length > 0) {
+            // Shuffle and take a subset for variety
+            const shuffled = realApps.sort(() => Math.random() - 0.5);
+            setApps(shuffled.slice(0, 25));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch apps, using fallback:', error);
+      }
+    };
+
+    fetchApps();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -150,6 +194,7 @@ export default function HeroCanvas() {
     let floats: FloatText[] = [];
     let actionBubbles: ActionBubble[] = [];
     const logoImgs: Record<string, HTMLImageElement> = {};
+    const appIconImgs: Record<string, HTMLImageElement> = {};
 
     // Character
     const char = {
@@ -170,7 +215,7 @@ export default function HeroCanvas() {
     let autoState = 'idle';
     let pauseTimer = 0;
 
-    // Preload logos
+    // Preload AI logos
     AI_LIST.forEach((ai) => {
       if (!ai.icon) return;
       const img = new Image();
@@ -181,8 +226,31 @@ export default function HeroCanvas() {
       };
     });
 
+    // Preload app icons
+    apps.forEach((app) => {
+      if (app.iconUrl) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = app.iconUrl;
+        img.onload = () => {
+          appIconImgs[app.nm] = img;
+        };
+        img.onerror = () => {
+          // If icon fails to load, try fallback using domain
+          if (app.domain) {
+            const fallbackImg = new Image();
+            fallbackImg.crossOrigin = 'anonymous';
+            fallbackImg.src = `https://thingsofbrand.com/api/icon/${app.domain}`;
+            fallbackImg.onload = () => {
+              appIconImgs[app.nm] = fallbackImg;
+            };
+          }
+        };
+      }
+    });
+
     const nextApp = () => {
-      const a = APPS[appIdx % APPS.length];
+      const a = apps[appIdx % apps.length];
       appIdx++;
       return a;
     };
@@ -324,9 +392,9 @@ export default function HeroCanvas() {
       burst(char.x + char.w / 2, char.y + char.h / 2, [m.app.bg, '#FFD700', '#ffffff', '#FF69B4', '#00FFAA'], 42);
       addFloat('+1 POWER', char.x + char.w / 2, char.y - 8);
 
-      const action = APP_ACTIONS[m.app.nm] || 'Performed action';
+      const action = `Performed action in ${m.app.nm}`;
       setTimeout(() => {
-        addActionBubble(`${action} in ${m.app.nm}`, char.x + char.w / 2, char.y - 16);
+        addActionBubble(action, char.x + char.w / 2, char.y - 16);
       }, 400);
 
       setTimeout(() => {
@@ -362,20 +430,35 @@ export default function HeroCanvas() {
       );
     };
 
-    const drawAppLogo = (app: (typeof APPS)[0], cx: number, cy: number) => {
+    const drawAppLogo = (app: AppData, cx: number, cy: number) => {
       const s = 28;
+      const iconImg = appIconImgs[app.nm];
+      
+      // Draw white background
       ctx.fillStyle = '#fff';
       roundRect(cx - s / 2 - 2, cy - s / 2 - 2, s + 4, s + 4, 5);
       ctx.fill();
-      ctx.fillStyle = app.bg;
-      roundRect(cx - s / 2, cy - s / 2, s, s, 4);
-      ctx.fill();
-      ctx.fillStyle = app.fg;
-      const fz = app.l.length > 1 ? 9 : 13;
-      ctx.font = `700 ${fz}px 'Press Start 2P', monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(app.l[0], cx, cy + 1);
+      
+      if (iconImg) {
+        // Draw the real icon image
+        ctx.save();
+        ctx.beginPath();
+        roundRect(cx - s / 2, cy - s / 2, s, s, 4);
+        ctx.clip();
+        ctx.drawImage(iconImg, cx - s / 2, cy - s / 2, s, s);
+        ctx.restore();
+      } else {
+        // Fallback to colored box with letter
+        ctx.fillStyle = app.bg;
+        roundRect(cx - s / 2, cy - s / 2, s, s, 4);
+        ctx.fill();
+        ctx.fillStyle = app.fg;
+        const fz = app.l.length > 1 ? 9 : 13;
+        ctx.font = `700 ${fz}px 'Press Start 2P', monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(app.l[0], cx, cy + 1);
+      }
     };
 
     const drawFallingApps = () => {
@@ -400,6 +483,7 @@ export default function HeroCanvas() {
       const bob = m.state === 'landing' ? Math.sin(bobT * 0.048) * 3.5 : 0;
       const cx = x + 24;
       const cy = y + 28 + bob;
+      const iconImg = appIconImgs[app.nm];
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -438,12 +522,22 @@ export default function HeroCanvas() {
       ];
       spots.forEach(([ox, oy, sw, sh]) => ctx.fillRect(ox, oy, sw, sh));
 
-      ctx.fillStyle = app.fg;
-      const fz = app.l.length > 1 ? 9 : 12;
-      ctx.font = `700 ${fz}px 'Press Start 2P', monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(app.l[0], 0, -8);
+      // Draw app icon or letter on mushroom cap
+      if (iconImg) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(0, -9, 10, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(iconImg, -10, -19, 20, 20);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = app.fg;
+        const fz = app.l.length > 1 ? 9 : 12;
+        ctx.font = `700 ${fz}px 'Press Start 2P', monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(app.l[0], 0, -8);
+      }
 
       ctx.fillStyle = app.fg === '#fff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)';
       ctx.fillRect(-6, 4, 4, 4);
@@ -773,7 +867,7 @@ export default function HeroCanvas() {
       clearTimeout(timeout);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [apps]);
 
   return (
     <canvas
