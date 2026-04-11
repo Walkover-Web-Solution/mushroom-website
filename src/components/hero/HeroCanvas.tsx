@@ -3,16 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { AI_CLIENTS, INTEGRATION_APPS, APP_ACTIONS } from '@/config/brand-icons';
 
-// Cloud pattern
-const CLOUD_G = [
-  [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-  [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-];
-
-// Local type for canvas apps (matches INTEGRATION_APPS structure but with shortened keys for canvas code)
+// Local type for canvas apps
 type CanvasApp = {
   nm: string;
   bg: string;
@@ -29,22 +20,6 @@ const APPS: CanvasApp[] = INTEGRATION_APPS.map(app => ({
   l: app.letter,
   domain: app.domain,
 }));
-
-interface Cloud {
-  x: number;
-  y: number;
-  sc: number;
-  sp: number;
-}
-
-interface FallingApp {
-  app: CanvasApp;
-  x: number;
-  y: number;
-  vy: number;
-  state: 'falling' | 'morphing' | 'done';
-  morphT: number;
-}
 
 interface Mushroom {
   app: CanvasApp;
@@ -95,25 +70,16 @@ export default function HeroCanvas() {
 
     // Constants
     const P = 4;
-    const TICKER_H = 52;
+    const TICKER_H = 0;
     const GRAV = 0.54;
-    const SPD = 4.4;
-    const FALL_SPEED = 1.5;
-    const MORPH_FRAMES = 20;
-    const MAX_ON_SCREEN = 3;
-    const NAV_CLEARANCE = 60;
 
     let W = 0;
     let H = 0;
     let GY = 0;
-    let appIdx = 0;
     let currentAIIdx = 0;
-    let dropTimer = 40;
     let booted = false;
 
     // State
-    let clouds: Cloud[] = [];
-    let fallingApps: FallingApp[] = [];
     let mushrooms: Mushroom[] = [];
     let parts: Particle[] = [];
     let floats: FloatText[] = [];
@@ -125,7 +91,7 @@ export default function HeroCanvas() {
     const loadedLogoImgs = new Set<string>();
     const failedLogoImgs = new Set<string>();
 
-    // Character
+    // Character — stationary doodle
     const char = {
       x: 100,
       y: 0,
@@ -141,85 +107,38 @@ export default function HeroCanvas() {
       powerUps: 0,
     };
 
-    let autoState = 'idle';
-    let pauseTimer = 0;
-
-    // Preload AI logos via local API proxy (avoids CORS issues with canvas)
+    // Preload AI logos
     AI_CLIENTS.forEach((ai) => {
       if (!ai.domain) return;
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        console.log(`✅ AI logo loaded: ${ai.name} (${ai.domain})`);
-        logoImgs[ai.name] = img;
-        loadedLogoImgs.add(ai.name);
-      };
-      img.onerror = (e) => {
-        console.error(`❌ AI logo FAILED: ${ai.name} (${ai.domain})`, e);
-        failedLogoImgs.add(ai.name);
-      };
-      // Use local API proxy to avoid CORS issues
+      img.onload = () => { logoImgs[ai.name] = img; loadedLogoImgs.add(ai.name); };
+      img.onerror = () => { failedLogoImgs.add(ai.name); };
       img.src = `/api/icon/${ai.domain}`;
     });
 
-    // Preload app icons via local API proxy (avoids CORS issues with canvas)
+    // Preload app icons
     APPS.forEach((app) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        console.log(`✅ App icon loaded: ${app.nm} (${app.domain})`);
-        appIconImgs[app.nm] = img;
-        loadedAppIcons.add(app.nm);
-      };
-      img.onerror = (e) => {
-        console.error(`❌ App icon FAILED: ${app.nm} (${app.domain})`, e);
-        failedAppIcons.add(app.nm);
-      };
-      // Use local API proxy to avoid CORS issues
+      img.onload = () => { appIconImgs[app.nm] = img; loadedAppIcons.add(app.nm); };
+      img.onerror = () => { failedAppIcons.add(app.nm); };
       img.src = `/api/icon/${app.domain}`;
     });
 
-    const nextApp = () => {
-      const a = APPS[appIdx % APPS.length];
-      appIdx++;
-      return a;
-    };
-
-    const getWalkBounds = () => ({
-      minX: Math.round(W * 0.1),
-      maxX: Math.round(W * 0.88),
-    });
-
-    const getOccupiedXPositions = () => {
-      const positions: number[] = [];
-      fallingApps.forEach((a) => positions.push(a.x));
-      mushrooms.forEach((m) => {
-        if (m.state !== 'gone') positions.push(m.x + 24);
-      });
-      return positions;
-    };
-
-    const initClouds = () => {
-      const configs = [
-        { pct: 0.12, y: 0.04, sc: 1.6, sp: 0.11 },
-        { pct: 0.5, y: 0.03, sc: 1.9, sp: 0.13 },
-        { pct: 0.82, y: 0.05, sc: 1.3, sp: 0.08 },
-      ];
-      clouds = configs.map((c) => ({
-        x: W * c.pct - 20,
-        y: Math.max(NAV_CLEARANCE, H * c.y),
-        sc: c.sc,
-        sp: c.sp,
-      }));
-    };
-
     const resize = () => {
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      const r = parent.getBoundingClientRect();
+      const r = canvas.getBoundingClientRect();
       W = canvas.width = r.width;
       H = canvas.height = r.height;
-      GY = H - TICKER_H;
+
+      const chatDemo = document.getElementById('chat-demo-container');
+      if (chatDemo) {
+        const chatRect = chatDemo.getBoundingClientRect();
+        GY = chatRect.top - r.top - 5;
+      } else {
+        GY = H - TICKER_H;
+      }
+
       if (char.y + char.h > GY) char.y = GY - char.h;
     };
 
@@ -227,9 +146,7 @@ export default function HeroCanvas() {
       try {
         const n = parseInt(hex.replace('#', ''), 16);
         return `rgb(${Math.min(255, ((n >> 16) & 255) + a)},${Math.min(255, ((n >> 8) & 255) + a)},${Math.min(255, (n & 255) + a)})`;
-      } catch {
-        return hex;
-      }
+      } catch { return hex; }
     };
 
     const roundRect = (x: number, y: number, w: number, h: number, r: number) => {
@@ -251,8 +168,7 @@ export default function HeroCanvas() {
         const a = (i / n) * Math.PI * 2 + Math.random() * 0.6;
         const sp = 2.5 + Math.random() * 5.5;
         parts.push({
-          x: cx,
-          y: cy,
+          x: cx, y: cy,
           vx: Math.cos(a) * sp,
           vy: Math.sin(a) * sp - 2.5,
           col: cols[i % cols.length],
@@ -271,160 +187,49 @@ export default function HeroCanvas() {
       actionBubbles.push({ text, x, y, age: 0, maxAge: 160 });
     };
 
-    const startDrop = () => {
-      const totalOnScreen = fallingApps.length + mushrooms.filter((m) => m.state !== 'gone').length;
-      if (totalOnScreen >= MAX_ON_SCREEN) return;
+    const spawnTwoMushrooms = () => {
+      const mushroomY = GY - 45;
+      // Define range to the right of the doodle
+      const minX = char.x + char.w + 60;
+      const maxX = Math.max(minX + 100, W * 0.9 - 48);
 
-      const app = nextApp();
-      const bounds = getWalkBounds();
-      const occupied = getOccupiedXPositions();
-      const charCx = char.x + char.w / 2;
+      const getRandomX = (start: number, end: number) => start + Math.random() * (end - start);
 
-      const isTooClose = (testX: number) => {
-        if (Math.abs(testX - charCx) < 60) return true;
-        for (const ox of occupied) {
-          if (Math.abs(testX - ox) < 70) return true;
-        }
-        return false;
-      };
+      let x1 = getRandomX(minX, maxX);
+      let x2 = getRandomX(minX, maxX);
 
-      const shuffled = [...clouds].sort(() => Math.random() - 0.5);
-      let chosenCloud: Cloud | null = null;
-      let chosenX: number | null = null;
-      for (const c of shuffled) {
-        const cloudCx = c.x + (10 * 7 * c.sc) / 2;
-        const x = Math.max(bounds.minX + 30, Math.min(bounds.maxX - 30, cloudCx));
-        if (!isTooClose(x)) {
-          chosenCloud = c;
-          chosenX = x;
-          break;
-        }
+      // Ensure they are not too close to each other (min 80px apart)
+      if (Math.abs(x1 - x2) < 80) {
+        if (x1 < x2) x2 = Math.min(maxX, x1 + 80 + Math.random() * 50);
+        else x1 = Math.min(maxX, x2 + 80 + Math.random() * 50);
       }
-      if (!chosenCloud || chosenX === null) return;
 
-      const cloudBottom = chosenCloud.y + CLOUD_G.length * 7 * chosenCloud.sc;
-      fallingApps.push({
-        app,
-        x: chosenX,
-        y: cloudBottom,
-        vy: FALL_SPEED + Math.random() * 0.45,
-        state: 'falling',
-        morphT: 0,
-      });
-    };
-
-    const absorbMush = (m: Mushroom) => {
-      if (!m || m.state === 'gone') return;
-      m.state = 'gone';
-      char.flashT = 36;
-      char.powerUps++;
-
-      burst(char.x + char.w / 2, char.y + char.h / 2, [m.app.bg, '#FFD700', '#ffffff', '#FF69B4', '#00FFAA'], 42);
-      addFloat('+1 POWER', char.x + char.w / 2, char.y - 8);
-
-      const action = APP_ACTIONS[m.app.nm] || 'Performed action';
-      setTimeout(() => {
-        addActionBubble(`${action} in ${m.app.nm}`, char.x + char.w / 2, char.y - 16);
-      }, 400);
-
-      setTimeout(() => {
-        currentAIIdx = (currentAIIdx + 1) % AI_CLIENTS.length;
-      }, 600);
-
-      setTimeout(() => {
-        mushrooms = mushrooms.filter((x) => x !== m);
-      }, 600);
-
-      autoState = 'pausing';
-      pauseTimer = 50;
-    };
-
-    const drawCloud = (c: Cloud) => {
-      const pw = 7 * c.sc;
-      c.x += c.sp;
-      if (c.x > W + 100) c.x = -100;
-      CLOUD_G.forEach((row, ri) =>
-        row.forEach((v, ci) => {
-          if (!v) return;
-          ctx.fillStyle = ri < 2 ? '#fff' : 'rgba(220,238,255,0.88)';
-          ctx.fillRect(c.x + ci * pw, c.y + ri * pw, pw, pw);
-          if (ri === 0 || (ri > 0 && !CLOUD_G[ri - 1][ci])) {
-            ctx.fillStyle = 'rgba(0,0,0,0.15)';
-            ctx.fillRect(c.x + ci * pw, c.y + ri * pw, pw, 1.5);
-          }
-          if (ci === 0 || (ci > 0 && !CLOUD_G[ri][ci - 1])) {
-            ctx.fillStyle = 'rgba(0,0,0,0.1)';
-            ctx.fillRect(c.x + ci * pw, c.y + ri * pw, 1.5, pw);
-          }
-        })
-      );
-    };
-
-    const drawAppLogo = (app: CanvasApp, cx: number, cy: number) => {
-      const s = 40;
-      const r = 10;
-      const iconImg = appIconImgs[app.nm];
-      const isLoaded = loadedAppIcons.has(app.nm);
-      const hasFailed = failedAppIcons.has(app.nm);
-      const iconSize = s * 0.68;
-      
-      // If icon is loaded, draw it on a white card
-      if (isLoaded && iconImg && iconImg.complete && iconImg.naturalWidth > 0) {
-        // White card background
-        ctx.fillStyle = '#ffffff';
-        roundRect(cx - s / 2, cy - s / 2, s, s, r);
-        ctx.fill();
-        // Subtle drop-shadow ring
-        ctx.strokeStyle = 'rgba(0,0,0,0.10)';
-        ctx.lineWidth = 1.5;
-        roundRect(cx - s / 2, cy - s / 2, s, s, r);
-        ctx.stroke();
-        // Draw the brand icon
-        ctx.drawImage(iconImg, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize);
-      } else if (hasFailed) {
-        // Letter fallback only when image has actually failed
-        ctx.fillStyle = app.bg;
-        roundRect(cx - s / 2, cy - s / 2, s, s, r);
-        ctx.fill();
-        ctx.fillStyle = app.fg;
-        const fz = app.l.length > 1 ? 10 : 14;
-        ctx.font = `700 ${fz}px 'Press Start 2P', monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(app.l, cx, cy + 1);
-      } else {
-        // Still loading - show a loading placeholder (subtle pulsing white card)
-        const pulse = 0.85 + 0.15 * Math.sin(Date.now() / 200);
-        ctx.fillStyle = `rgba(255,255,255,${pulse})`;
-        roundRect(cx - s / 2, cy - s / 2, s, s, r);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.10)';
-        ctx.lineWidth = 1.5;
-        roundRect(cx - s / 2, cy - s / 2, s, s, r);
-        ctx.stroke();
-      }
-    };
-
-    const drawFallingApps = () => {
-      fallingApps.forEach((a) => {
-        if (a.state === 'falling') {
-          drawAppLogo(a.app, a.x, a.y);
-        } else if (a.state === 'morphing') {
-          const p = Math.min(1, a.morphT / MORPH_FRAMES);
-          if (p < 0.6) {
-            ctx.save();
-            ctx.globalAlpha = 1 - p * 1.6;
-            drawAppLogo(a.app, a.x, GY - 28);
-            ctx.restore();
-          }
-        }
-      });
+      mushrooms = [
+        {
+          app: APPS[Math.floor(Math.random() * APPS.length)],
+          state: 'landing',
+          x: x1,
+          y: mushroomY,
+          vy: 0,
+          bobT: Math.random() * 100,
+          scaleY: 1
+        },
+        {
+          app: APPS[Math.floor(Math.random() * APPS.length)],
+          state: 'landing',
+          x: x2,
+          y: mushroomY,
+          vy: 0,
+          bobT: Math.random() * 100,
+          scaleY: 1
+        },
+      ];
     };
 
     const drawMushroom = (m: Mushroom) => {
       if (!m || m.state === 'gone') return;
       const { app, x, y, bobT, scaleY } = m;
-      const bob = m.state === 'landing' ? Math.sin(bobT * 0.048) * 3.5 : 0;
+      const bob = Math.sin(bobT * 0.048) * 3.5;
       const cx = x + 24;
       const cy = y + 28 + bob;
 
@@ -432,17 +237,20 @@ export default function HeroCanvas() {
       ctx.translate(cx, cy);
       ctx.scale(1, scaleY || 1);
 
+      // Shadow
       ctx.fillStyle = 'rgba(0,0,0,0.14)';
       ctx.beginPath();
       ctx.ellipse(0, 28, 16, 5, 0, 0, Math.PI * 2);
       ctx.fill();
 
+      // Stem
       ctx.fillStyle = '#F2EDD8';
       ctx.fillRect(-8, 0, 16, 16);
       ctx.fillRect(-10, 13, 20, 4);
       ctx.fillStyle = 'rgba(255,255,255,0.32)';
       ctx.fillRect(-8, 0, 4, 14);
 
+      // Cap
       ctx.fillStyle = app.bg;
       const capRects: [number, number, number, number][] = [
         [-10, -18, 20, 6],
@@ -455,6 +263,7 @@ export default function HeroCanvas() {
       ctx.fillStyle = lighter;
       ctx.fillRect(-16, 0, 32, 4);
 
+      // Spots
       ctx.fillStyle = 'rgba(255,255,255,0.88)';
       const spots: [number, number, number, number][] = [
         [-11, -15, 6, 5],
@@ -465,6 +274,8 @@ export default function HeroCanvas() {
       ];
       spots.forEach(([ox, oy, sw, sh]) => ctx.fillRect(ox, oy, sw, sh));
 
+      /*
+      // App icon on cap
       const mushIconImg = appIconImgs[app.nm];
       const mushIconSize = 16;
       const mushIconLoaded = loadedAppIcons.has(app.nm);
@@ -472,7 +283,6 @@ export default function HeroCanvas() {
       if (mushIconLoaded && mushIconImg && mushIconImg.complete && mushIconImg.naturalWidth > 0) {
         ctx.drawImage(mushIconImg, -mushIconSize / 2, -16, mushIconSize, mushIconSize);
       } else if (mushIconFailed) {
-        // Only show letter fallback if image actually failed
         ctx.fillStyle = app.fg;
         const fz = app.l.length > 1 ? 9 : 12;
         ctx.font = `700 ${fz}px 'Press Start 2P', monospace`;
@@ -480,8 +290,9 @@ export default function HeroCanvas() {
         ctx.textBaseline = 'middle';
         ctx.fillText(app.l[0], 0, -8);
       }
-      // If still loading, don't show anything on the mushroom cap (cleaner look)
+      */
 
+      // Eyes on stem
       ctx.fillStyle = app.fg === '#fff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)';
       ctx.fillRect(-6, 4, 4, 4);
       ctx.fillRect(2, 4, 4, 4);
@@ -534,7 +345,8 @@ export default function HeroCanvas() {
       r(ai.col, 1, 9, 8, 6);
       r('#ffffff', 1, 9, 8, 1);
 
-      // AI client logo on torso
+      /*
+      // AI logo on torso
       ctx.save();
       const badgeX = 5 * P;
       const badgeY = 11.5 * P;
@@ -545,34 +357,27 @@ export default function HeroCanvas() {
       if (logoLoaded && logo && logo.complete && logo.naturalWidth > 0) {
         ctx.drawImage(logo, badgeX - badgeS / 2, badgeY - badgeS / 2, badgeS, badgeS);
       } else if (logoFailed) {
-        // Only show symbol fallback if image actually failed
         ctx.fillStyle = '#fff';
         ctx.font = "10px 'Press Start 2P', monospace";
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(ai.sym, badgeX, badgeY);
       }
-      // If still loading, show nothing (cleaner look)
       ctx.restore();
+      */
 
       // Waist
       r('#64748b', 1, 15, 8, 1);
 
-      // Legs
-      if (frame === 0) {
-        r('#94a3b8', 1, 16, 3, 3);
-        r('#94a3b8', 6, 16, 3, 3);
-        r('#64748b', 1, 19, 3, 1);
-        r('#64748b', 6, 19, 3, 1);
-      } else {
-        r('#94a3b8', 1, 16, 3, 4);
-        r('#94a3b8', 5, 16, 4, 3);
-        r('#64748b', 1, 19, 4, 1);
-        r('#64748b', 5, 19, 4, 1);
-      }
+      // Legs — static stance (frame always 0)
+      r('#94a3b8', 1, 16, 3, 3);
+      r('#94a3b8', 6, 16, 3, 3);
+      r('#64748b', 1, 19, 3, 1);
+      r('#64748b', 6, 19, 3, 1);
 
       ctx.restore();
 
+      /*
       // Name label
       ctx.save();
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -581,116 +386,22 @@ export default function HeroCanvas() {
       ctx.textBaseline = 'top';
       ctx.fillText(ai.name, cx, y + char.h + 4);
       ctx.restore();
-    };
-
-    const drawGround = () => {
-      ctx.fillStyle = '#0a0a0a';
-      ctx.fillRect(0, GY, W, 4);
+      */
     };
 
     const update = () => {
-      // Drop timer
-      dropTimer--;
-      if (dropTimer <= 0 && fallingApps.length + mushrooms.filter((m) => m.state !== 'gone').length < MAX_ON_SCREEN) {
-        startDrop();
-        dropTimer = 40 + Math.floor(Math.random() * 40);
-      }
-
-      // Update falling apps
-      fallingApps.forEach((a) => {
-        if (a.state === 'falling') {
-          a.y += a.vy;
-          if (a.y >= GY - 32) {
-            a.y = GY - 32;
-            a.state = 'morphing';
-            a.morphT = 0;
-          }
-        } else if (a.state === 'morphing') {
-          a.morphT++;
-          if (a.morphT >= MORPH_FRAMES) {
-            mushrooms.push({
-              app: a.app,
-              state: 'landing',
-              x: a.x - 24,
-              y: GY - 56,
-              vy: 0,
-              bobT: 0,
-              scaleY: 1,
-            });
-            a.state = 'done';
-          }
-        }
-      });
-      fallingApps = fallingApps.filter((a) => a.state !== 'done');
-
-      // Character AI
-      const collectible = mushrooms.filter((m) => m.state === 'landing');
-      if (autoState === 'pausing') {
-        char.vx = 0;
-        pauseTimer--;
-        if (pauseTimer <= 0) {
-          autoState = 'seeking';
-        }
-      } else if (collectible.length > 0) {
-        autoState = 'seeking';
-        let nearest: Mushroom | null = null;
-        let nearDist = Infinity;
-        collectible.forEach((m) => {
-          const d = Math.abs(m.x + 24 - (char.x + char.w / 2));
-          if (d < nearDist) {
-            nearDist = d;
-            nearest = m;
-          }
-        });
-        if (nearest !== null) {
-          const nearestMush = nearest as Mushroom;
-          const mushCx = nearestMush.x + 24;
-          const targetX = mushCx - char.w / 2;
-          if (Math.abs(char.x - targetX) > 8) {
-            const dir = char.x < targetX ? 1 : -1;
-            char.vx = SPD * 0.8 * dir;
-            char.face = dir > 0 ? 'right' : 'left';
-          } else {
-            char.vx = 0;
-            absorbMush(nearestMush);
-          }
-        }
-      } else {
-        char.vx = 0;
-        autoState = 'idle';
-      }
-
-      // Physics
+      // Gravity — keep char on ground
       char.vy = Math.min(char.vy + GRAV, 20);
-      char.x += char.vx;
       char.y += char.vy;
-
-      const bounds = getWalkBounds();
-      char.x = Math.max(bounds.minX, Math.min(bounds.maxX - char.w, char.x));
-
-      char.onGround = false;
       if (char.y + char.h >= GY) {
         char.y = GY - char.h;
         char.vy = 0;
         char.onGround = true;
       }
-
-      // Walk animation
-      if (Math.abs(char.vx) > 0.5) {
-        char.frameT++;
-        if (char.frameT > 7) {
-          char.frame ^= 1;
-          char.frameT = 0;
-        }
-      } else {
-        char.frame = 0;
-      }
       if (char.flashT > 0) char.flashT--;
 
       // Mushroom bobbing
-      mushrooms.forEach((m) => {
-        if (m.state === 'landing') m.bobT++;
-      });
+      mushrooms.forEach((m) => { if (m.state === 'landing') m.bobT++; });
 
       // Particles
       parts.forEach((p) => {
@@ -703,17 +414,12 @@ export default function HeroCanvas() {
       parts = parts.filter((p) => p.life > 0);
 
       // Floats
-      floats.forEach((f) => {
-        f.t--;
-        f.age++;
-      });
+      floats.forEach((f) => { f.t--; f.age++; });
       floats = floats.filter((f) => f.t > 0);
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
-      clouds.forEach(drawCloud);
-      drawFallingApps();
       mushrooms.forEach((m) => drawMushroom(m));
       drawChar();
 
@@ -774,8 +480,6 @@ export default function HeroCanvas() {
         ab.age++;
       });
       actionBubbles = actionBubbles.filter((ab) => ab.age < ab.maxAge);
-
-      drawGround();
     };
 
     let animationId: number;
@@ -790,13 +494,14 @@ export default function HeroCanvas() {
       if (booted) return;
       booted = true;
       resize();
-      initClouds();
 
-      const bounds = getWalkBounds();
+      // Place doodle at center-bottom, stationary
       char.y = GY - char.h;
-      char.x = (bounds.minX + bounds.maxX) / 2 - char.w / 2;
-      autoState = 'idle';
-      dropTimer = 10;
+      char.x = W / 2 - char.w / 2 - 300;
+      char.face = 'right';
+
+      // Spawn the two static mushrooms
+      spawnTwoMushrooms();
 
       loop();
     };
@@ -807,7 +512,8 @@ export default function HeroCanvas() {
 
     const handleResize = () => {
       resize();
-      initClouds();
+      char.x = W / 2 - char.w / 2 - 300;
+      spawnTwoMushrooms();
     };
     window.addEventListener('resize', handleResize);
 
@@ -816,13 +522,16 @@ export default function HeroCanvas() {
       clearTimeout(timeout);
       window.removeEventListener('resize', handleResize);
     };
+
+    // Keep these referenced so TypeScript doesn't complain about unused vars
+    void burst; void addFloat; void addActionBubble;
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
       id="gc"
-      className="absolute inset-0 w-full h-full block pixelated"
+      className="absolute inset-0 mx-auto max-w-[1120px] w-full h-full block pixelated"
     />
   );
 }

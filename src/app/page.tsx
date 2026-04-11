@@ -2,6 +2,7 @@
 
 import Navbar from '@/components/ui/Navbar';
 import Hero from '@/components/hero/Hero';
+
 import UseCases from '@/components/sections/UseCases';
 import Integrations from '@/components/sections/Integrations';
 import AiClients from '@/components/sections/AiClients';
