@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 const baseUrl = 'https://mushrooms.viasocket.com';
 
 const APPS_PER_SITEMAP = 45;
