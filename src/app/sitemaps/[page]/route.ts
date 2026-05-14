@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { fetchAiClients } from '@/lib/ai-clients';
 
 const BASE_URL = 'https://plug-service.viasocket.com/api/v1/plugins/all';
@@ -97,7 +97,7 @@ async function aiclientsAppsSitemap(pageNum: number) {
 }
 
 export async function GET(
-  request: NextRequest,
+  _request: Request,
   context: { params: Promise<{ page: string }> }
 ) {
   try {
