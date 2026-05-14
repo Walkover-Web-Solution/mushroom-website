@@ -1,6 +1,8 @@
 import { fetchAiClients } from '@/lib/ai-clients';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 const SITE_URL ='https://mushrooms.viasocket.com';
 
 export async function GET() {

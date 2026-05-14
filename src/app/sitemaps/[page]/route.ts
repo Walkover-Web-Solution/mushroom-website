@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchAiClients } from '@/lib/ai-clients';
+
+export const runtime = 'edge';
 
 const BASE_URL = 'https://plug-service.viasocket.com/api/v1/plugins/all';
 const SITE_URL = 'https://mushrooms.viasocket.com';
