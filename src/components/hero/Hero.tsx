@@ -4,6 +4,7 @@ import Link from 'next/link';
 import HeroCanvas from './HeroCanvas';
 import Ticker from './Ticker';
 import { useAppsCount } from '@/context/AppsCountContext';
+import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   const { displayCount } = useAppsCount();
@@ -61,19 +62,7 @@ export default function Hero() {
               }}
             >
               SELECT AI AND YOUR APPS
-              <svg 
-                width="14" 
-                height="14" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-                className="inline-block flex-shrink-0"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
+              <ArrowRight className="inline-block flex-shrink-0" size={14} />
             </Link>
           </div>
         </div>

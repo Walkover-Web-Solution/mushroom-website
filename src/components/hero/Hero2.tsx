@@ -7,6 +7,7 @@ import { INTEGRATION_APPS } from '@/config/brand-icons';
 import HeroChatDemo from '@/components/hero/HeroChatDemo';
 import HeroCanvas2 from './HeroCanvas2';
 import { useState, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 export default function Hero2() {
     const { displayCount } = useAppsCount();
@@ -84,9 +85,7 @@ export default function Hero2() {
                             }}
                         >
                             Get Started free
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block flex-shrink-0">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
+                            <ArrowRight className="inline-block flex-shrink-0" size={14} />
                         </Link>
 
                         <div id="chat-demo-container" className="w-full mt-[50px] sm:mt-[80px] lg:mt-[120px]">
