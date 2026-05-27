@@ -17,7 +17,19 @@
     box-shadow: 6px 6px 0 rgba(10, 10, 10, 0.35);
     display: flex;
     flex-direction: column;
-    height: 510px;
+    height: 340px;
+}
+
+@media (min-width: 480px) {
+    .chatDemoWindow {
+        height: 420px;
+    }
+}
+
+@media (min-width: 768px) {
+    .chatDemoWindow {
+        height: 510px;
+    }
 }
 
 .chatDemoBar {
@@ -63,14 +75,28 @@
 
 /* ── Messages container ── */
 .chatDemoMessages {
-    padding: 28px 40px;
+    padding: 16px 18px;
     flex: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
     transition: opacity 0.5s ease;
     scrollbar-width: none;
+}
+
+@media (min-width: 480px) {
+    .chatDemoMessages {
+        padding: 20px 28px;
+        gap: 16px;
+    }
+}
+
+@media (min-width: 768px) {
+    .chatDemoMessages {
+        padding: 28px 40px;
+        gap: 18px;
+    }
 }
 
 .chatDemoMessages::-webkit-scrollbar {
@@ -83,11 +109,27 @@
     background: var(--ink);
     color: #fff;
     font-family: var(--body);
-    font-size: 15px;
+    font-size: 13px;
     line-height: 1.5;
-    padding: 12px 18px;
+    padding: 10px 14px;
     border-radius: 18px 18px 4px 18px;
-    max-width: 72%;
+    max-width: 80%;
+}
+
+@media (min-width: 480px) {
+    .cdmUser {
+        font-size: 14px;
+        padding: 11px 16px;
+        max-width: 76%;
+    }
+}
+
+@media (min-width: 768px) {
+    .cdmUser {
+        font-size: 15px;
+        padding: 12px 18px;
+        max-width: 72%;
+    }
 }
 
 /* ── Tool call row ── */
@@ -191,10 +233,24 @@
     background: #2f2f2f;
     color: rgba(255, 255, 255, 0.88);
     font-family: var(--body);
-    font-size: 15px;
+    font-size: 13px;
     line-height: 1.6;
-    padding: 12px 18px;
+    padding: 10px 14px;
     border-radius: 18px 18px 18px 4px;
+}
+
+@media (min-width: 480px) {
+    .cdmClaude {
+        font-size: 14px;
+        padding: 11px 16px;
+    }
+}
+
+@media (min-width: 768px) {
+    .cdmClaude {
+        font-size: 15px;
+        padding: 12px 18px;
+    }
 }
 
 /* ── Typing cursor ── */

@@ -104,9 +104,9 @@ export default function UseCases() {
   return (
     <section
       ref={sectionRef}
-      className="section-usecases"
+      className="section-usecases px-5 sm:px-8 md:px-12 pt-10 pb-[100px] sm:pb-[140px] lg:pb-[182px]"
       id="use-cases"
-      style={{ padding: '40px 48px 182px', maxWidth: 1200, margin: '0 auto' }}
+      style={{ maxWidth: 1200, margin: '0 auto' }}
     >
       <div className="usecases-header reveal text-left relative z-[3]" style={{ marginBottom: 48 }}>
         <h2 className="section-headline leading-tight mb-3.5 font-pixel font-normal text-[var(--ink)] text-[clamp(22px,3.4vw,40px)]">
@@ -127,7 +127,7 @@ export default function UseCases() {
                 ))}
               </div>
             </div>
-            <h3 className="usecase-title font-body text-[22px] font-bold text-[var(--ink)] leading-[1.3]">
+            <h3 className="usecase-title font-body text-[18px] sm:text-[20px] md:text-[22px] font-bold text-[var(--ink)] leading-[1.3]">
               {uc.title}
             </h3>
           </div>

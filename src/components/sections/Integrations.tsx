@@ -119,9 +119,9 @@ export default function Integrations({ clientId }: { clientId?: string } = {}) {
   return (
     <section 
       ref={sectionRef} 
-      className="section-integrations max-[540px]:hidden" 
+      className="section-integrations px-5 sm:px-8 md:px-12 py-[60px] sm:py-[80px]" 
       id="integrations"
-      style={{ background: 'var(--cream)', padding: '80px 48px 80px', maxWidth: 1200, margin: '0 auto' }}
+      style={{ background: 'var(--cream)', maxWidth: 1200, margin: '0 auto' }}
     >
       
       <div className="integrations-box border-2 border-[rgba(10,10,10,0.1)] rounded-xl overflow-hidden bg-white relative z-[3]">
@@ -148,7 +148,7 @@ export default function Integrations({ clientId }: { clientId?: string } = {}) {
         </div>
 
         <div className="integrations-layout grid grid-cols-[200px_1fr] gap-0 bg-white max-[768px]:grid-cols-1">
-          <div className="integrations-sidebar border-r-2 border-[rgba(10,10,10,0.08)] py-2 bg-white max-[768px]:border-r-0 max-[768px]:border-b-2 max-[768px]:flex max-[768px]:flex-wrap max-[768px]:gap-1 max-[768px]:p-2" style={{ overflowY: 'auto', maxHeight: 487 }}>
+          <div className="integrations-sidebar border-r-2 border-[rgba(10,10,10,0.08)] py-2 bg-white max-[768px]:border-r-0 max-[768px]:border-b-2 max-[768px]:flex max-[768px]:flex-wrap max-[768px]:gap-1 max-[768px]:p-2" style={{ overflowY: 'auto', maxHeight: 487, overflowX: 'auto' }}>
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -175,7 +175,7 @@ export default function Integrations({ clientId }: { clientId?: string } = {}) {
 
           <div className="integrations-grid-wrap flex flex-col" style={{ overflowY: 'auto', maxHeight: 487 }}>
             <div 
-              className="integrations-grid grid grid-cols-4 auto-rows-[54px] min-h-0 max-[1024px]:grid-cols-3 max-[768px]:grid-cols-3" 
+              className="integrations-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-[54px] min-h-0 max-[1024px]:grid-cols-3" 
               style={{ minHeight: '432px' }} // Fixed height: 8 rows * 54px = 432px
             >
               {loading ? (
@@ -264,22 +264,21 @@ export default function Integrations({ clientId }: { clientId?: string } = {}) {
                   <Link
                     key={app.rowid ?? idx}
                     href={clientId ? `/aiclients/${clientId}/${app.appslugname}` : `/mcp/${app.appslugname}`}
-                    className="integ-cell flex items-center gap-[10px] border-r border-b border-[rgba(10,10,10,0.07)] transition-colors hover:bg-[rgba(6,143,87,0.05)] [&:nth-child(4n)]:border-r-0 max-[1024px]:[&:nth-child(4n)]:border-r max-[1024px]:[&:nth-child(3n)]:border-r-0"
-                    style={{ padding: '13px 16px', textDecoration: 'none', cursor: 'pointer' }}
+                    className="integ-cell flex flex-row items-center gap-[8px] sm:gap-[10px] border-r border-b border-[rgba(10,10,10,0.07)] transition-colors hover:bg-[rgba(6,143,87,0.05)] [&:nth-child(2n)]:border-r-0 sm:[&:nth-child(2n)]:border-r sm:[&:nth-child(3n)]:border-r-0 md:[&:nth-child(3n)]:border-r md:[&:nth-child(4n)]:border-r-0"
+                    style={{ padding: '10px 12px', textDecoration: 'none', cursor: 'pointer', minHeight: '54px' }}
                   >
                     <span
-                      className="integ-icon w-7 h-7 rounded-[7px] flex items-center justify-center flex-shrink-0 overflow-hidden"
-                      // style={{ backgroundColor: app.brandcolor || '#888', flexShrink: 0 }}
+                      className="integ-icon w-6 h-6 sm:w-7 sm:h-7 rounded-[7px] flex items-center justify-center flex-shrink-0 overflow-hidden"
                     >
                       {app.iconurl ? (
-                        <Image src={app.iconurl.trimStart()} alt={app.name} width={28} height={28}  />
+                        <Image src={app.iconurl.trimStart()} alt={app.name} width={24} height={24} className="w-full h-full object-contain" />
                       ) : (
                         <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '10px', fontWeight: 700, color: '#fff' }}>{app.name.charAt(0).toUpperCase()}</span>
                       )}
                     </span>
                     <span
-                      className="integ-name whitespace-nowrap overflow-hidden text-ellipsis"
-                      style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: 'var(--ink)' }}
+                      className="integ-name whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0"
+                      style={{ fontFamily: "'Poppins', sans-serif", fontSize: 'clamp(11px, 2vw, 13px)', color: 'var(--ink)' }}
                     >
                       {app.name}
                     </span>

@@ -36,7 +36,7 @@ export default function Pricing() {
           {PRICING_CARDS.map((card, idx) => (
             <div
               key={idx}
-              className="pricing-card border border-[rgba(0,0,0,0.1)] rounded-[14px] p-8 flex flex-col gap-[14px]"
+              className="pricing-card border border-[rgba(0,0,0,0.1)] rounded-[14px] p-5 sm:p-8 flex flex-col gap-[14px]"
             >
               <h3 className="font-body text-[28px] font-bold text-[var(--ink)]">
                 {card.title}
@@ -46,7 +46,7 @@ export default function Pricing() {
               </p>
               <Link
                 href="https://app.mushrooms.viasocket.com/login"
-                className="pricing-card-cta inline-block py-[15px] px-[38px] rounded-lg bg-[var(--ink)] text-white font-pixel font-normal text-[clamp(11px,1.3vw,14px)] tracking-[0.08em] no-underline transition-transform self-start whitespace-nowrap hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                className="pricing-card-cta block w-full sm:w-auto sm:self-start py-[13px] px-[24px] sm:px-[38px] rounded-lg bg-[var(--ink)] text-white font-pixel font-normal text-[11px] sm:text-[clamp(11px,1.3vw,14px)] tracking-[0.06em] no-underline transition-transform text-center hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
               >
                 {card.cta}
               </Link>

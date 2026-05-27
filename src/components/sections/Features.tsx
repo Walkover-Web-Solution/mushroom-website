@@ -129,7 +129,7 @@ export default function Features() {
   }, []);
 
   return (
-    <div ref={sectionRef} className="pixel-band relative w-full" id="green-band" style={{ background: 'var(--green)', padding: '60px 48px' }}>
+    <div ref={sectionRef} className="pixel-band relative w-full" id="green-band">
       <PixelEdge position="top" />
       <PixelEdge position="bottom" />
       
@@ -150,13 +150,11 @@ export default function Features() {
           </h2>
         </div>
 
-        <div className="features-grid grid grid-cols-3 gap-4 max-w-[1100px] mx-auto max-[1200px]:grid-cols-2 max-[540px]:grid-cols-1" style={{gap:'16px'}}>
+        <div className="features-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-[1100px] mx-auto" style={{gap:'16px'}}>
           {FEATURES.slice(0, 3).map((f, idx) => (
             <div
               key={idx}
-              className={`feature-card reveal bg-white border-[3px] border-[#068F57] rounded-[14px] py-6 px-6 pb-7 transition-all hover:translate-y-[-4px] hover:shadow-[0_12px_32px_rgba(6,143,87,0.15)] ${
-                idx === 2 ? 'max-[1200px]:col-span-full max-[1200px]:max-w-[calc(50%-8px)] max-[1200px]:mx-auto max-[540px]:col-auto max-[540px]:max-w-none max-[540px]:mx-0' : ''
-              }`}
+              className="feature-card reveal bg-white border-[3px] border-[#068F57] rounded-[14px] py-6 px-6 pb-7 transition-all hover:translate-y-[-4px] hover:shadow-[0_12px_32px_rgba(6,143,87,0.15)]"
               data-delay={idx}
             >
               <h3 
@@ -183,11 +181,11 @@ export default function Features() {
               </p>
             </div>
           ))}
-          <div className="features-bottom col-span-full flex justify-center gap-4 max-[1200px]:flex-col" style={{gap:'16px'}}>
+          <div className="features-bottom col-span-full grid grid-cols-1 sm:grid-cols-2 gap-4" style={{gap:'16px'}}>
             {FEATURES.slice(3).map((f, idx) => (
               <div
                 key={idx}
-                className="feature-card reveal flex-1 max-w-[calc(33.333%-10px)] bg-white border-[3px] border-[#068F57] rounded-[14px] py-6 px-6 pb-7 transition-all hover:translate-y-[-4px] hover:shadow-[0_12px_32px_rgba(6,143,87,0.15)] max-[1200px]:max-w-none"
+                className="feature-card reveal bg-white border-[3px] border-[#068F57] rounded-[14px] py-6 px-6 pb-7 transition-all hover:translate-y-[-4px] hover:shadow-[0_12px_32px_rgba(6,143,87,0.15)]"
                 data-delay={idx + 3}
               >
                 <h3 

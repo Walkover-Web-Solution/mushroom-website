@@ -446,6 +446,12 @@ body {
 }
 
 @media (max-width: 768px) {
+  .section {
+    padding: 60px 24px;
+  }
+  .pixel-band {
+    padding: 60px 24px;
+  }
   .pixel-edge-top,
   .pixel-edge-bottom {
     height: 160px;
@@ -469,6 +475,9 @@ body {
   .how-card-arrow {
     display: none;
   }
+  .how-card-title {
+    font-size: 22px;
+  }
   .pricing-band {
     padding: 192px 0 60px;
   }
@@ -481,10 +490,10 @@ body {
 
 @media (max-width: 540px) {
   .section {
-    padding: 56px 20px;
+    padding: 48px 16px;
   }
   .pixel-band {
-    padding: 56px 20px;
+    padding: 48px 16px;
   }
   .pixel-edge-top,
   .pixel-edge-bottom {
@@ -495,6 +504,12 @@ body {
   }
   .pixel-edge-bottom {
     bottom: -128px;
+  }
+  .how-card-title {
+    font-size: 20px;
+  }
+  .usecase-title {
+    font-size: 18px;
   }
   .pricing-band {
     padding: 160px 0 48px;
