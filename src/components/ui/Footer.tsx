@@ -9,10 +9,10 @@ export default function Footer() {
       <div className="footer-brand-band bg-[var(--green)] flex flex-col items-center justify-end overflow-hidden">
         <div className="footer-brand-scene relative w-full flex items-center justify-center">
           <span 
-            className="footer-wordmark whitespace-nowrap block text-center mt-12 relative"
+            className="footer-wordmark block text-center mt-12 relative overflow-hidden text-ellipsis px-2"
             style={{
               fontFamily: "'Symtext', 'Press Start 2P', monospace",
-              fontSize: 'clamp(20px, 7.2vw, 115px)',
+              fontSize: 'clamp(16px, 7.2vw, 115px)',
               fontWeight: 400,
               color: '#fff',
               lineHeight: 1,

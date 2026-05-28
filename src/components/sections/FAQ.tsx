@@ -154,7 +154,7 @@ export default function FAQ({ items }: FAQProps = {}) {
             </div>
             <div
               className={`faq-answer overflow-hidden transition-[max-height] duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                openId === item.id ? 'max-h-[200px]' : 'max-h-0'
+                openId === item.id ? 'max-h-[400px]' : 'max-h-0'
               }`}
             >
               <div 

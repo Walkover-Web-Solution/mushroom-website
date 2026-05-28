@@ -13,8 +13,8 @@ export default function Navbar({ onFreePillClick }: NavbarProps) {
       style={{
         position: 'fixed',
         top: 28,
-        left: 32,
-        right: 32,
+        left: 16,
+        right: 16,
         zIndex: 1000,
         display: 'flex',
         justifyContent: 'space-between',
@@ -24,9 +24,10 @@ export default function Navbar({ onFreePillClick }: NavbarProps) {
         boxShadow: 'none',
         pointerEvents: 'none',
       }}
+      className="sm:!left-8 sm:!right-8"
     >
       <Link href="/" className="nav-brand" style={{ display: 'flex', alignItems: 'center', pointerEvents: 'auto' }}>
-        <img src="/logo.png" alt="Mushrooms Logo" style={{ height: '42px', width: 'auto' }} />
+        <img src="/logo.png" alt="Mushrooms Logo" className="h-[34px] sm:h-[42px] w-auto" />
       </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto' }}>
         <Link
@@ -46,9 +47,8 @@ export default function Navbar({ onFreePillClick }: NavbarProps) {
           href="https://viasocket.com/embed"
           target="_blank"
           rel="noopener noreferrer nofollow"
-          className="max-[540px]:hidden"
+          className="max-[540px]:hidden inline-block"
           style={{
-            display: 'inline-block',
             padding: '7px 18px', borderRadius: 100,
             background: 'var(--ink)', color: '#fff',
             fontFamily: "'Poppins', sans-serif", fontSize: 13, fontWeight: 600,
@@ -60,13 +60,10 @@ export default function Navbar({ onFreePillClick }: NavbarProps) {
         </Link>
         <Link
           href="https://app.mushrooms.viasocket.com/login"
+          className="inline-block rounded-full bg-[var(--ink)] text-white font-['Poppins'] text-[12px] sm:text-[13px] font-semibold whitespace-nowrap no-underline transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
           style={{
-            display: 'inline-block',
-            padding: '7px 18px', borderRadius: 100,
-            background: 'var(--ink)', color: '#fff',
-            fontFamily: "'Poppins', sans-serif", fontSize: 13, fontWeight: 600,
-            whiteSpace: 'nowrap', textDecoration: 'none',
-            transition: 'transform 0.12s, box-shadow 0.12s',
+            padding: '6px 14px',
+            pointerEvents: 'auto',
           }}
         >
           Dashboard →

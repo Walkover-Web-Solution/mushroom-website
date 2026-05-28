@@ -64,9 +64,9 @@ export default function AiClients({ appSlug }: { appSlug?: string } = {}) {
   return (
     <section
       ref={sectionRef}
-      className="max-[540px]:hidden"
+      className="px-5 sm:px-8 md:px-12 pb-[80px] sm:pb-[120px] lg:pb-[150px]"
       id="ai-clients"
-      style={{ background: 'var(--cream)', padding: '0 48px 150px', maxWidth: 1200, margin: '0 auto' }}
+      style={{ background: 'var(--cream)', maxWidth: 1200, margin: '0 auto' }}
     >
       <div className="reveal text-left mb-10 relative z-[3]">
         <h2
@@ -105,7 +105,7 @@ export default function AiClients({ appSlug }: { appSlug?: string } = {}) {
           />
         </div>
 
-        <div className="grid grid-cols-4 max-[1024px]:grid-cols-3 max-[768px]:grid-cols-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 max-[1024px]:grid-cols-3">
           {loading ? (
             <div
               className="col-span-full flex items-center justify-center"
@@ -162,19 +162,19 @@ export default function AiClients({ appSlug }: { appSlug?: string } = {}) {
                 <Link
                   key={client.id}
                   href={appSlug ? `/aiclients/${client.id}/${appSlug}` : `/aiclients/${client.id}`}
-                  className="flex items-center gap-[10px] border-r border-b border-[rgba(10,10,10,0.07)] transition-colors hover:bg-[rgba(6,143,87,0.05)] [&:nth-child(4n)]:border-r-0 max-[1024px]:[&:nth-child(4n)]:border-r max-[1024px]:[&:nth-child(3n)]:border-r-0"
-                  style={{ padding: '13px 16px', textDecoration: 'none', height: '54px' }}
+                  className="flex flex-row items-center gap-[8px] sm:gap-[10px] border-r border-b border-[rgba(10,10,10,0.07)] transition-colors hover:bg-[rgba(6,143,87,0.05)] [&:nth-child(2n)]:border-r-0 sm:[&:nth-child(2n)]:border-r sm:[&:nth-child(3n)]:border-r-0 md:[&:nth-child(3n)]:border-r md:[&:nth-child(4n)]:border-r-0"
+                  style={{ padding: '10px 12px', textDecoration: 'none', minHeight: '54px' }}
                 >
                   <span
-                    className="w-7 h-7 rounded-[7px] flex items-center justify-center flex-shrink-0 overflow-hidden bg-[rgba(10,10,10,0.06)]"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-[7px] flex items-center justify-center flex-shrink-0 overflow-hidden bg-[rgba(10,10,10,0.06)]"
                   >
                     {domain ? (
                       <Image
                         src={`/api/icon/${domain}`}
                         alt={client.title}
-                        width={28}
-                        height={28}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 7 }}
+                        width={24}
+                        height={24}
+                        className="w-full h-full object-contain rounded-[7px]"
                         unoptimized
                       />
                     ) : (
@@ -184,8 +184,8 @@ export default function AiClients({ appSlug }: { appSlug?: string } = {}) {
                     )}
                   </span>
                   <span
-                    className="whitespace-nowrap overflow-hidden text-ellipsis"
-                    style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: 'var(--ink)' }}
+                    className="whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0"
+                    style={{ fontFamily: "'Poppins', sans-serif", fontSize: 'clamp(11px, 2vw, 13px)', color: 'var(--ink)' }}
                   >
                     {client.title}
                   </span>
