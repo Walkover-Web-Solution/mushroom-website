@@ -100,6 +100,17 @@ function getCache(key: string): any | null {
   return cached.data;
 }
 
+/**
+ * Normalize the clientId to match the DB's ai_client format.
+ * The DB stores values like "Chatgpt", "Cursor", "Claude", "Amazon-quick-suite"
+ * i.e. the clientId (URL param) with just the first letter uppercased.
+ * client.title (e.g. "ChatGPT") does NOT match — always use the clientId.
+ */
+function normalizeClientId(clientId: string): string {
+  if (!clientId) return clientId;
+  return clientId.charAt(0).toUpperCase() + clientId.slice(1);
+}
+
 export async function fetchAiAppData(appSlug: string, clientId?: string): Promise<AiAppData | null> {
   // Check cache first
   const cacheKey = getCacheKey(appSlug, clientId);
@@ -108,13 +119,15 @@ export async function fetchAiAppData(appSlug: string, clientId?: string): Promis
     return cached;
   }
 
+  const normalizedClient = clientId ? normalizeClientId(clientId) : undefined;
+
   try {
     const res = await fetch(AI_APP_FLOW_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         app_slug: appSlug,
-        ai_client: clientId,
+        ai_client: normalizedClient,
       }),
     });
 

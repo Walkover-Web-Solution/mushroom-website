@@ -35,7 +35,7 @@ export function AppClientPageContent({
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchAiAppData(appSlug, client.title)
+    fetchAiAppData(appSlug, client.id)
       .then((data) => {
         if (!cancelled) {
           setAppData(data);

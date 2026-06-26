@@ -18,7 +18,7 @@ export async function generateMetadata(
     const client = clients.find((c) => c.id === clientId);
     if (!client) return { title: 'Mushrooms MCP' };
 
-    const appData = await fetchAiAppData(appSlug, client.title);
+    const appData = await fetchAiAppData(appSlug, clientId);
     if (!appData) return { title: 'Mushrooms MCP' };
 
     const title = appData.page_title || `Connect ${client.title} to ${appData.name} — Mushrooms MCP`;
