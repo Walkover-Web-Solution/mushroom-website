@@ -6,6 +6,7 @@ import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
 import FAQ from '@/components/sections/FAQ';
 import styles from './pricing.module.css';
+import { fetchAppsCount } from '@/lib/apps-count';
 
 const FAQ_DATA = [
   {
@@ -45,7 +46,6 @@ const FAQ_DATA = [
 ];
 
 const FEATURES = [
-  '2,000+ Apps',
   'Free to use',
   'No Code Required',
   'Granular Permissions',
@@ -55,11 +55,16 @@ const FEATURES = [
 
 export default function PricingPage() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [appsCount, setAppsCount] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
   const toggleFaq = (id: string) => {
     setOpenId(openId === id ? null : id);
   };
+
+  useEffect(() => {
+    fetchAppsCount().then(setAppsCount);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -112,7 +117,7 @@ export default function PricingPage() {
             <ul className={styles.pcList}>
               <li>No credit card</li>
               <li>Fair usage, no hard limits</li>
-              <li>2,000+ integrations</li>
+              <li>{appsCount ? `${appsCount}+ integrations` : '2,000+ integrations'}</li>
               <li>Works with Claude, ChatGPT, Cursor, Windsurf + more</li>
             </ul>
             <a
@@ -134,7 +139,7 @@ export default function PricingPage() {
             </p>
             <ul className={styles.pcList}>
               <li>White-labelled, your brand</li>
-              <li>2,000+ apps, no pipelines to build</li>
+              <li>2,200+ apps, no pipelines to build</li>
               <li>Ships in hours, one script tag</li>
               <li>Self-hosted MCP, your infrastructure</li>
             </ul>

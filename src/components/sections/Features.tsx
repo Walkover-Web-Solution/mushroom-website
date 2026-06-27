@@ -1,44 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-
-const FEATURES = [
-  {
-    title: 'OPTIMIZED EXECUTION',
-    desc: 'Less tokens. Faster responses. No bloated context windows.',
-  },
-  {
-    title: '2,000+ INTEGRATIONS',
-    desc: '2,000+ apps. No custom API wrappers. Just plug in.',
-  },
-  {
-    title: 'SECURE CHANNEL',
-    desc: 'Your data stays within your boundary. Nothing stored, nothing shared.',
-  },
-  {
-    title: 'LOG HISTORY',
-    desc: 'Every action recorded. Full visibility into what happened and when.',
-  },
-  {
-    title: 'YOU CONTROL THE AI',
-    desc: 'Granular permissions per action. Nothing runs without your approval.',
-  },
-];
-
-const HOW_STEPS = [
-  {
-    title: 'Connect your AI',
-    desc: 'One MCP URL connects any AI client — Claude, Cursor, Windsurf, ChatGPT — instantly to your stack.',
-  },
-  {
-    title: 'Select tools & actions',
-    desc: 'Choose from 2,000+ apps and define exactly what your AI can do — granular, per-action permissions.',
-  },
-  {
-    title: 'Execute with control',
-    desc: 'Every action is scoped, logged, and approved. Your AI runs with intent — nothing happens without your rules.',
-  },
-];
+import { fetchAppsCount } from '@/lib/apps-count';
 
 function PixelEdge({ position }: { position: 'top' | 'bottom' }) {
   const [pixels, setPixels] = useState<Array<{ x: number; y: number }>>([]);
@@ -101,6 +64,49 @@ function PixelEdge({ position }: { position: 'top' | 'bottom' }) {
 
 export default function Features() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [appsCount, setAppsCount] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAppsCount().then(setAppsCount);
+  }, []);
+
+  const FEATURES = [
+    {
+      title: 'OPTIMIZED EXECUTION',
+      desc: 'Less tokens. Faster responses. No bloated context windows.',
+    },
+    {
+      title: `${appsCount ? `${appsCount}+` : '2,000+'} INTEGRATIONS`,
+      desc: `${appsCount ? `${appsCount}+` : '2,000+'} apps. No custom API wrappers. Just plug in.`,
+    },
+    {
+      title: 'SECURE CHANNEL',
+      desc: 'Your data stays within your boundary. Nothing stored, nothing shared.',
+    },
+    {
+      title: 'LOG HISTORY',
+      desc: 'Every action recorded. Full visibility into what happened and when.',
+    },
+    {
+      title: 'YOU CONTROL THE AI',
+      desc: 'Granular permissions per action. Nothing runs without your approval.',
+    },
+  ];
+
+  const HOW_STEPS = [
+    {
+      title: 'Connect your AI',
+      desc: 'One MCP URL connects any AI client — Claude, Cursor, Windsurf, ChatGPT — instantly to your stack.',
+    },
+    {
+      title: 'Select tools & actions',
+      desc: `Choose from ${appsCount ? `${appsCount}+` : '2,000+'} apps and define exactly what your AI can do — granular, per-action permissions.`,
+    },
+    {
+      title: 'Execute with control',
+      desc: 'Every action is scoped, logged, and approved. Your AI runs with intent — nothing happens without your rules.',
+    },
+  ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
