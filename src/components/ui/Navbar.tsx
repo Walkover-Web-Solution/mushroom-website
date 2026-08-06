@@ -1,12 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { withUtmSource, type Variant } from '@/lib/variant';
+import { useVariant } from '@/lib/useVariant';
 
 interface NavbarProps {
+  variant?: Variant;
   onFreePillClick?: () => void;
 }
 
-export default function Navbar({ onFreePillClick }: NavbarProps) {
+export default function Navbar({ variant: knownVariant, onFreePillClick }: NavbarProps) {
+  const variant = useVariant(knownVariant);
+
   return (
     <nav
       id="hero-nav"
@@ -59,7 +64,7 @@ export default function Navbar({ onFreePillClick }: NavbarProps) {
           Explore Embed
         </Link>
         <Link
-          href="https://app.mushrooms.viasocket.com/login"
+          href={withUtmSource('https://app.mushrooms.viasocket.com/login', variant)}
           className="inline-block rounded-full bg-[var(--ink)] text-white font-['Poppins'] text-[12px] sm:text-[13px] font-semibold whitespace-nowrap no-underline transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
           style={{
             padding: '6px 14px',

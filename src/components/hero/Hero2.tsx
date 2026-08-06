@@ -9,12 +9,14 @@ import HeroCanvas2 from './HeroCanvas2';
 import { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { HeroContent } from '@/lib/hero-content';
+import { withUtmSource, type Variant } from '@/lib/variant';
 
 interface Hero2Props {
     content: HeroContent;
+    variant: Variant;
 }
 
-export default function Hero2({ content }: Hero2Props) {
+export default function Hero2({ content, variant }: Hero2Props) {
     const { displayCount } = useAppsCount();
     const [, setRandomApps] = useState<typeof INTEGRATION_APPS[number][]>([]);
 
@@ -105,7 +107,7 @@ export default function Hero2({ content }: Hero2Props) {
 
                         {/* CTA */}
                         <Link
-                            href={content.ctaHref}
+                            href={withUtmSource(content.ctaHref, variant)}
                             id="hero-cta"
                             className="inline-flex items-center gap-2 pointer-events-auto animate-fade-up-delay transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.32)]"
                             style={{

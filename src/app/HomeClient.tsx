@@ -12,9 +12,7 @@ import Footer from '@/components/ui/Footer';
 import Hero from '@/components/hero/Hero';
 import Hero2 from '@/components/hero/Hero2';
 import type { HeroContent } from '@/lib/hero-content';
-
-const USER_ID_COOKIE = 'userId';
-const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+import { USER_ID_COOKIE, COOKIE_MAX_AGE_SECONDS, getVariant } from '@/lib/variant';
 
 interface HomeClientProps {
   userId: number;
@@ -36,14 +34,16 @@ export default function HomeClient({ userId, shouldSetCookie, heroContent }: Hom
     }
   };
 
+  const variant = getVariant(userId);
+
   return (
     <div className="p-0">
-      <Navbar onFreePillClick={scrollToPricing} />
-      {userId % 2 === 0 ? <Hero /> : <Hero2 content={heroContent} />}
+      <Navbar variant={variant} onFreePillClick={scrollToPricing} />
+      {variant === 'A' ? <Hero variant={variant} /> : <Hero2 content={heroContent} variant={variant} />}
       <Integrations />
       <AiClients />
       <Features />
-      <Pricing />
+      <Pricing variant={variant} />
       <Blog />
       <FAQ />
       <Footer />

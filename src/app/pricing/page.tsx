@@ -7,6 +7,8 @@ import Footer from '@/components/ui/Footer';
 import FAQ from '@/components/sections/FAQ';
 import styles from './pricing.module.css';
 import { fetchAppsCount } from '@/lib/apps-count';
+import { withUtmSource } from '@/lib/variant';
+import { useVariant } from '@/lib/useVariant';
 
 const FAQ_DATA = [
   {
@@ -57,6 +59,7 @@ export default function PricingPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [appsCount, setAppsCount] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const variant = useVariant();
 
   const toggleFaq = (id: string) => {
     setOpenId(openId === id ? null : id);
@@ -90,7 +93,7 @@ export default function PricingPage() {
 
   return (
     <div className={styles.pricingPageWrapper}>
-      <Navbar />
+      <Navbar variant={variant} />
       
       {/* PAGE HEADER */}
       <div className={styles.pricingPageHeader}>
@@ -121,7 +124,7 @@ export default function PricingPage() {
               <li>Works with Claude, ChatGPT, Cursor, Windsurf + more</li>
             </ul>
             <a
-              href="https://app.mushrooms.viasocket.com/login"
+              href={withUtmSource('https://app.mushrooms.viasocket.com/login', variant)}
               target="_blank"
               rel="noopener noreferrer nofollow"
               className={styles.pcCtaFull}

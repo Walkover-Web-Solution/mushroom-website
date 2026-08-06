@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { withUtmSource, type Variant } from '@/lib/variant';
+import { useVariant } from '@/lib/useVariant';
 
 const PRICING_CARDS = [
   {
@@ -15,7 +17,13 @@ const PRICING_CARDS = [
   },
 ];
 
-export default function Pricing() {
+interface PricingProps {
+  variant?: Variant;
+}
+
+export default function Pricing({ variant: knownVariant }: PricingProps) {
+  const variant = useVariant(knownVariant);
+
   return (
     <div className="pricing-band bg-[var(--cream)] pt-[182px] pb-[100px] px-12 max-[768px]:pt-[192px] max-[768px]:pb-[60px] max-[768px]:px-0 max-[540px]:pt-[160px] max-[540px]:pb-[48px]" id="pricing">
       <div className="pricing-wrap max-w-[1100px] mx-auto bg-white border border-[rgba(0,0,0,0.1)] rounded-[20px] pt-12 pb-[52px] px-12 max-[768px]:mx-4 max-[768px]:py-9 max-[768px]:px-7 max-[768px]:pb-10 max-[768px]:rounded-2xl max-[540px]:mx-3 max-[540px]:py-7 max-[540px]:px-5 max-[540px]:pb-8">
@@ -45,7 +53,7 @@ export default function Pricing() {
                 {card.desc}
               </p>
               <Link
-                href="https://app.mushrooms.viasocket.com/login"
+                href={withUtmSource('https://app.mushrooms.viasocket.com/login', variant)}
                 className="pricing-card-cta block w-full sm:w-auto sm:self-start py-[13px] px-[24px] sm:px-[38px] rounded-lg bg-[var(--ink)] text-white font-pixel font-normal text-[11px] sm:text-[clamp(11px,1.3vw,14px)] tracking-[0.06em] no-underline transition-transform text-center hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
               >
                 {card.cta}

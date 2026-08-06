@@ -5,8 +5,13 @@ import HeroCanvas from './HeroCanvas';
 import Ticker from './Ticker';
 import { useAppsCount } from '@/context/AppsCountContext';
 import { ArrowRight } from 'lucide-react';
+import { withUtmSource, type Variant } from '@/lib/variant';
 
-export default function Hero() {
+interface HeroProps {
+  variant: Variant;
+}
+
+export default function Hero({ variant }: HeroProps) {
   const { displayCount } = useAppsCount();
 
   return (
@@ -45,7 +50,7 @@ export default function Hero() {
               <strong style={{ color: 'var(--ink)', fontWeight: 700 }}>Power up</strong> your AI <span style={{ color: 'var(--ink)' }}>with</span> {displayCount} apps
             </p>
             <Link
-              href="https://app.mushrooms.viasocket.com/login"
+              href={withUtmSource('https://app.mushrooms.viasocket.com/login', variant)}
               id="hero-cta"
               className="inline-flex items-center gap-2 pointer-events-auto animate-fade-up-delay transition-transform hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(0,0,0,0.32)]"
               style={{
