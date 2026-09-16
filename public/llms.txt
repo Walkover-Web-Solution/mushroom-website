@@ -9,6 +9,17 @@ Mushrooms by viaSocket is the MCP layer for AI agents. It exposes 1000+ app inte
 - [Integrations](https://mushrooms.viasocket.com/#integrations): Browse all available MCP app integrations
 - [Pricing](https://mushrooms.viasocket.com/pricing): Plans and pricing for Mushrooms
 
+## Build Your Own Custom MCP Server
+
+Beyond the 1000+ pre-built app integrations below, Mushrooms also lets anyone create their own MCP server ("cluster") at [app.mushrooms.viasocket.com](https://app.mushrooms.viasocket.com) and wire it up to their own product or internal APIs - no MCP server code required.
+
+A custom MCP server can have:
+- **Its own OAuth 2.1 login**, delegated to the company's real platform. Mushrooms implements the full MCP Authorization spec on the company's behalf (RFC 9728 protected-resource metadata, RFC 8414 authorization-server metadata, Dynamic Client Registration) even if the company's own login system doesn't support any of that - the AI client only ever talks to Mushrooms, and the end user authenticates against the company's real login, not a shared or fake one.
+- **Custom tools backed by real APIs.** Define a tool's name, description, and input schema, point it at an HTTP endpoint, and Mushrooms forwards the AI's arguments there (JSON or multipart/file-upload), auto-attaching the logged-in session's access token unless the tool already sets its own.
+- **Skills** - reusable instructions (not code) that show up to the AI client as a callable tool; calling it returns the instructions as text, useful for onboarding an AI to a specific integration's conventions without bloating every tool's own description.
+
+MCP server URLs for custom clusters look like `https://mcp.viasocket.com/mcp/<id>-<orgId>`.
+
 ## Blogs
 
 - [What is MCP and Why It's the Future of AI Integration](https://viasocket.com/blog/what-is-mcp-and-why-its-the-future-of-ai-integration): Introduction to MCP and its role in connecting AI agents to real-world tools
